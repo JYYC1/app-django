@@ -48,16 +48,17 @@ class AcGameMenu {
         });
     }
 
-
-}
-
-
-
-class AcGame {
-    constructor(id) {
-        this.id = id;
-        this.$ac_game = $('#' + id);
-        this.menu = new AcGameMenu(this);
+ show() {  // 显示menu界面
+        this.$menu.show();
     }
+
+  hide() {  // 关闭menu界面
+        this.$menu.hide();
+    }
+
+
+
 }
+
+
 
