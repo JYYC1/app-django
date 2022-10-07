@@ -1,7 +1,7 @@
 class Settings {
     constructor(root) {
         this.root = root;
-        this.platform = "WEB"; //getinfo.py 相对应
+        this.platform = "WEB";
         if (this.root.AcWingOS) this.platform = "ACAPP";
         this.username = "";
         this.photo = "";
@@ -81,9 +81,7 @@ class Settings {
     </div>
 </div>
 `);
-
-
-        this.$login = this.$settings.find(".ac-game-settings-login"); // 登录
+        this.$login = this.$settings.find(".ac-game-settings-login");
         this.$login_username = this.$login.find(".ac-game-settings-username input");
         this.$login_password = this.$login.find(".ac-game-settings-password input");
         this.$login_submit = this.$login.find(".ac-game-settings-submit button");
@@ -92,7 +90,7 @@ class Settings {
 
         this.$login.hide();
 
-        this.$register = this.$settings.find(".ac-game-settings-register"); // 注册
+        this.$register = this.$settings.find(".ac-game-settings-register");
         this.$register_username = this.$register.find(".ac-game-settings-username input");
         this.$register_password = this.$register.find(".ac-game-settings-password-first input");
         this.$register_password_confirm = this.$register.find(".ac-game-settings-password-second input");
@@ -107,10 +105,9 @@ class Settings {
         this.root.$ac_game.append(this.$settings);
 
         this.start();
+    }
 
-
-	}
-	start() {
+    start() {
         if (this.platform === "ACAPP") {
             this.getinfo_acapp();
         } else {
@@ -129,7 +126,7 @@ class Settings {
         });
     }
 
-	add_listening_events_login() {
+    add_listening_events_login() {
         let outer = this;
 
         this.$login_register.click(function() {
@@ -140,7 +137,7 @@ class Settings {
         });
     }
 
-	add_listening_events_register() {
+    add_listening_events_register() {
         let outer = this;
         this.$register_login.click(function() {
             outer.login();
@@ -150,9 +147,9 @@ class Settings {
         });
     }
 
-	acwing_login() {
+    acwing_login() {
         $.ajax({
-            url: "https://app3184.acapp.acwing.com.cn/settings/acwing/web/apply_code/",
+            url: "https://app165.acapp.acwing.com.cn/settings/acwing/web/apply_code/",
             type: "GET",
             success: function(resp) {
                 if (resp.result === "success") {
@@ -162,10 +159,9 @@ class Settings {
         });
     }
 
-
-	login_on_remote() {  // 在远程服务器上登录
+    login_on_remote() {  // 在远程服务器上登录
         let outer = this;
-        let username = this.$login_username.val(); // 取出的input 的值
+        let username = this.$login_username.val();
         let password = this.$login_password.val();
         this.$login_error_message.empty();
 
@@ -178,7 +174,7 @@ class Settings {
             },
             success: function(resp) {
                 if (resp.result === "success") {
-                    location.reload(); // 成功就刷新
+                    location.reload();
                 } else {
                     outer.$login_error_message.html(resp.result);
                 }
@@ -186,7 +182,7 @@ class Settings {
         });
     }
 
-	register_on_remote() {  // 在远程服务器上注册
+    register_on_remote() {  // 在远程服务器上注册
         let outer = this;
         let username = this.$register_username.val();
         let password = this.$register_password.val();
@@ -205,13 +201,13 @@ class Settings {
                 if (resp.result === "success") {
                     location.reload();  // 刷新页面
                 } else {
-                    outer.$register_error_message.html(resp.result); // 错误的话展示出来
+                    outer.$register_error_message.html(resp.result);
                 }
             }
         });
     }
 
-	logout_on_remote() {  // 在远程服务器上登出
+    logout_on_remote() {  // 在远程服务器上登出
         if (this.platform === "ACAPP") {
             this.root.AcWingOS.api.window.close();
         } else {
@@ -220,26 +216,37 @@ class Settings {
                 type: "GET",
                 success: function(resp) {
                     if (resp.result === "success") {
-                        location.reload(); // 成功的话刷新页面
+                        location.reload();
                     }
                 }
             });
         }
     }
 
- 
     register() {  // 打开注册界面
-        this.$login.hide(); // 先关闭登录再打开注册
+        this.$login.hide();
         this.$register.show();
     }
 
-
-   login() {  // 打开登录界面
+    login() {  // 打开登录界面
         this.$register.hide();
         this.$login.show();
     }
 
-  getinfo_acapp() {
+    acapp_login(appid, redirect_uri, scope, state) {
+        let outer = this;
+
+        this.root.AcWingOS.api.oauth2.authorize(appid, redirect_uri, scope, state, function(resp) {
+            if (resp.result === "success") {
+                outer.username = resp.username;
+                outer.photo = resp.photo;
+                outer.hide();
+                outer.root.menu.show();
+            }
+        });
+    }
+
+    getinfo_acapp() {
         let outer = this;
 
         $.ajax({
@@ -275,19 +282,12 @@ class Settings {
         });
     }
 
-
-	hide() {
+    hide() {
         this.$settings.hide();
     }
 
-  show() {
+    show() {
         this.$settings.show();
     }
-
-
-
-
-
 }
-
 
