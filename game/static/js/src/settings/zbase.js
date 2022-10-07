@@ -150,6 +150,19 @@ class Settings {
         });
     }
 
+	acwing_login() {
+        $.ajax({
+            url: "https://app3184.acapp.acwing.com.cn/settings/acwing/web/apply_code/",
+            type: "GET",
+            success: function(resp) {
+                if (resp.result === "success") {
+                    window.location.replace(resp.apply_code_url);
+                }
+            }
+        });
+    }
+
+
 	login_on_remote() {  // 在远程服务器上登录
         let outer = this;
         let username = this.$login_username.val(); // 取出的input 的值
@@ -192,7 +205,7 @@ class Settings {
                 if (resp.result === "success") {
                     location.reload();  // 刷新页面
                 } else {
-                    outer.$register_error_message.html(resp.result);
+                    outer.$register_error_message.html(resp.result); // 错误的话展示出来
                 }
             }
         });
@@ -207,7 +220,7 @@ class Settings {
                 type: "GET",
                 success: function(resp) {
                     if (resp.result === "success") {
-                        location.reload();
+                        location.reload(); // 成功的话刷新页面
                     }
                 }
             });
