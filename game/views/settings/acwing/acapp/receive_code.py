@@ -1,25 +1,35 @@
-from django.shortcuts import redirect
+from django.http import JsonResponse
 from django.core.cache import cache
 import requests
 from django.contrib.auth.models import User
 from game.models.player.player import Player
-from django.contrib.auth import login
 from random import randint
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 def receive_code(request):
     data = request.GET
+
+    if "errcode" in data:
+        return JsonResponse({
+            'result': "apply failed",
+            'errcode': data['errcode'],
+            'errmsg': data['errmsg'],
+        })
+
     code = data.get('code')
     state = data.get('state')
 
     if not cache.has_key(state):
-        return redirect("index")
+        return JsonResponse({
+            'result': "state not exist"
+        })
     cache.delete(state)
 
     apply_access_token_url = "https://www.acwing.com/third_party/api/oauth2/access_token/"
     params = {
-        'appid': "3184",
-        'secret': "2664ddca687b4f799ba8ea3e736b1556",
+        'appid': "165",
+        'secret': "2a79c385f35e4533ab803031fab68e3d",
         'code': code
     }
 
@@ -30,8 +40,16 @@ def receive_code(request):
 
     players = Player.objects.filter(openid=openid)
     if players.exists():  # 如果该用户已存在，则无需重新获取信息，直接登录即可
-        login(request, players[0].user)
-        return redirect("index") # 重定向到主页
+        player = players[0]
+        refresh = RefreshToken.for_user(player.user)
+        return JsonResponse({
+            'result': "success",
+            'username': player.user.username,
+            'photo': player.photo,
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+        })
+
 
     get_userinfo_url = "https://www.acwing.com/third_party/api/meta/identity/getinfo/"
     params = {
@@ -48,8 +66,12 @@ def receive_code(request):
     user = User.objects.create(username=username)
     player = Player.objects.create(user=user, photo=photo, openid=openid)
 
-    login(request, user)
-
-    return redirect("index")
-
+    refresh = RefreshToken.for_user(user)
+    return JsonResponse({
+        'result': "success",
+        'username': player.user.username,
+        'photo': player.photo,
+        'access': str(refresh.access_token),
+        'refresh': str(refresh),
+    })
 
